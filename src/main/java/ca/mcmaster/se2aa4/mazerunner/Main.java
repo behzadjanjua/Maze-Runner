@@ -1,34 +1,28 @@
 package ca.mcmaster.se2aa4.mazerunner;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class Main {
-
     private static final Logger logger = LogManager.getLogger();
 
     public static void main(String[] args) {
         logger.info("** Starting Maze Runner");
 
-        // CLI options
+        // Set up CLI options
         Options options = new Options();
         options.addOption("i", "input", true, "Path to the maze input file");
 
-        // command line parser
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd;
         String inputFilePath = null;
 
-        // Checking for -i flag, and then parsing
+        // Parse the command-line arguments
         try {
             cmd = parser.parse(options, args);
 
-            // Step 3: Retrieve the value of the -i flag
+            // Check if the -i flag is provided, and get the input file path
             if (cmd.hasOption("i")) {
                 inputFilePath = cmd.getOptionValue("i");
             } else {
@@ -40,26 +34,21 @@ public class Main {
             return;
         }
 
+        // Load the maze and log entry/exit points
         try {
-            logger.info("**** Reading the maze from file " + args[0]);
-            BufferedReader reader = new BufferedReader(new FileReader(args[0]));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                for (int idx = 0; idx < line.length(); idx++) {
-                    if (line.charAt(idx) == '#') {
-                        logger.info("WALL ");
-                    } else if (line.charAt(idx) == ' ') {
-                        logger.info("PASS ");
-                    }
-                }
-                logger.info(System.lineSeparator());
-            }
+            logger.info("**** Reading the maze from file " + inputFilePath);
+            Maze maze = new Maze();
+            maze.loadMaze(inputFilePath);
+
+            logger.info("**** Maze loaded successfully");
+            logger.info("Entry point: (" + maze.getEntryColumn() + ", " + maze.getEntryRow() + ")");
+            logger.info("Exit point: (" + maze.getExitColumn() + ", " + maze.getExitRow() + ")");
         } catch (Exception e) {
-            logger.error("/!\\ An error has occured /!\\");
+            logger.error("/!\\ An error has occurred: " + e.getMessage());
         }
 
         logger.info("**** Computing path");
-        logger.info("PATH NOT COMPUTED");
+        logger.info("PATH NOT COMPUTED"); // Placeholder for future path computation
         logger.info("** End of MazeRunner");
     }
 }
