@@ -3,7 +3,12 @@ package ca.mcmaster.se2aa4.mazerunner;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class Explorer {
+    private static final Logger logger = LogManager.getLogger();
+
     private int currentColumn, currentRow; // Explorer's current position in the maze
     private DirectionManager.Direction currentDirection; // Direction explorer is facing
     private Maze maze; // The maze the explorer is navigating
@@ -15,6 +20,20 @@ public class Explorer {
         this.currentRow = maze.getEntryRow();
         this.currentDirection = DirectionManager.Direction.EAST; // Start facing east
         this.movementPath = new ArrayList<>();
+    }
+
+    public void solveStraightMaze() {
+        // Start at the entry point
+        int currentColumn = maze.getEntryColumn();
+        int currentRow = maze.getEntryRow();
+
+        // Continue moving forward until we reach the exit column
+        while (currentColumn != maze.getExitColumn()) {
+            movementPath.add("F"); // Record forward movement
+            currentColumn++; // Move one step forward
+        }
+
+        logger.info("Maze solved. Path: " + String.join("", movementPath)); // Log the path
     }
 
     // Move one step forward if the next tile is a passage
