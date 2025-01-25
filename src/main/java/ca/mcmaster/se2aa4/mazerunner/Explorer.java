@@ -57,11 +57,18 @@ public class Explorer {
             if (movementPath.get(i).equals(movementPath.get(i - 1))) {
                 repeatCount++;
             } else {
-                factorizedPath.append(repeatCount > 1 ? repeatCount : "").append(movementPath.get(i - 1));
+                if (repeatCount > 1) {
+                    factorizedPath.append(repeatCount);
+                }
+                factorizedPath.append(movementPath.get(i - 1));
                 repeatCount = 1;
             }
         }
-        factorizedPath.append(repeatCount > 1 ? repeatCount : "").append(movementPath.get(movementPath.size() - 1));
+
+        if (repeatCount > 1) {
+            factorizedPath.append(repeatCount);
+        }
+        factorizedPath.append(movementPath.get(movementPath.size() - 1));
         return factorizedPath.toString();
     }
 }
