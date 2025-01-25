@@ -23,17 +23,22 @@ public class Explorer {
     }
 
     public void solveStraightMaze() {
+        // Ensure the maze is a straight path
+        if (maze.getEntryRow() != maze.getExitRow()) {
+            throw new IllegalStateException("Maze is not a straight path. Cannot solve.");
+        }
+    
         // Start at the entry point
         int currentColumn = maze.getEntryColumn();
-        int currentRow = maze.getEntryRow();
-
-        // Continue moving forward until we reach the exit column
-        while (currentColumn != maze.getExitColumn()) {
+    
+        // Move forward until reaching the exit column
+        while (currentColumn < maze.getExitColumn()) {
             movementPath.add("F"); // Record forward movement
             currentColumn++; // Move one step forward
         }
-
-        logger.info("Maze solved. Path: " + String.join("", movementPath)); // Log the path
+    
+        // Log the path
+        logger.info("Maze solved. Path: " + String.join("", movementPath));
     }
 
     // Move one step forward if the next tile is a passage
