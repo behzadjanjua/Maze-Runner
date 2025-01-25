@@ -1,5 +1,8 @@
 package ca.mcmaster.se2aa4.mazerunner;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,12 +46,31 @@ public class Main {
             logger.info("**** Maze loaded successfully");
             logger.info("Entry point: (" + maze.getEntryColumn() + ", " + maze.getEntryRow() + ")");
             logger.info("Exit point: (" + maze.getExitColumn() + ", " + maze.getExitRow() + ")");
-        } catch (Exception e) {
-            logger.error("/!\\ An error has occurred: " + e.getMessage());
-        }
 
-        logger.info("**** Computing path");
-        logger.info("PATH NOT COMPUTED"); // Placeholder for future path computation
+            logger.info("**** Computing path");
+
+            // 1) Create Explorer for this maze
+            Explorer explorer = new Explorer(maze);
+
+            // 2) Solve the maze (straight path only)
+            explorer.solveStraightMaze();
+
+            // 3) Retrieve movement paths
+            List<String> canonicalPath = explorer.getCanonicalMovementPath();
+            String factorizedPath = explorer.getFactorizedMovementPath();
+
+            // 4) Log results
+            logger.info("Canonical path: " + String.join("", canonicalPath));
+            logger.info("Factorized path: " + factorizedPath);
+
+        } catch (IOException e) {
+            // Specifically handle file-related I/O issues (e.g., file not found, read errors)
+            logger.error("/!\\ An error occurred while reading the maze file: " + e.getMessage());
+        } catch (Exception e) {
+            // Handle any other runtime errors (e.g., path computations, invalid data)
+            logger.error("/!\\ An error occurred while computing the path: " + e.getMessage());
+        }
+        
         logger.info("** End of MazeRunner");
     }
 }
