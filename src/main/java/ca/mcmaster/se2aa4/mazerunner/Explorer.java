@@ -2,17 +2,16 @@ package ca.mcmaster.se2aa4.mazerunner;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class Explorer {
     private static final Logger logger = LogManager.getLogger();
 
-    private int currentColumn, currentRow; // Explorer's current position in the maze
-    private DirectionManager.Direction currentDirection; // Direction explorer is facing
-    private Maze maze; // The maze the explorer is navigating
-    private List<String> movementPath; // Keeps track of all movements (F, L, R)
+    private int currentColumn, currentRow;
+    private DirectionManager.Direction currentDirection;
+    private Maze maze;
+    private List<String> movementPath;
 
     public Explorer(Maze maze) {
         this.maze = maze;
@@ -22,57 +21,74 @@ public class Explorer {
         this.movementPath = new ArrayList<>();
     }
 
-    public void solveStraightMaze() {
-        // Ensure the maze is a straight path
-        if (maze.getEntryRow() != maze.getExitRow()) {
-            throw new IllegalStateException("Maze is not a straight path. Cannot solve.");
+    public void solveRightHandMaze() {
+        logger.info("Solving maze using the Right-Hand Rule...");
+
+        while (currentColumn != maze.getExitColumn() || currentRow != maze.getExitRow()) {
+            if (canMoveRight()) {
+                turnToRight();
+                moveForward();
+            } else if (canMoveForward()) {
+                moveForward();
+            } else if (canMoveLeft()) {
+                turnToLeft();
+                moveForward();
+            } else {
+                turnAround();
+            }
         }
-    
-        // Start at the entry point
-        int currentColumn = maze.getEntryColumn();
-    
-        // Move forward until reaching the exit column
-        while (currentColumn < maze.getExitColumn()) {
-            movementPath.add("F"); // Record forward movement
-            currentColumn++; // Move one step forward
-        }
-    
-        // Log the path
-        logger.info("Maze solved. Path: " + String.join("", movementPath));
+
+        logger.info("Maze solved using Right-Hand Rule. Path: " + getFactorizedMovementPath());
     }
 
-    // Move one step forward if the next tile is a passage
-    public void moveForwardIfPossible() {
-        int[] forwardStepOffsets = DirectionManager.getForwardStepOffsets(currentDirection);
-        int nextColumn = currentColumn + forwardStepOffsets[0];
-        int nextRow = currentRow + forwardStepOffsets[1];
-
-        // Check if the tile ahead is passable
-        if (maze.getTile(nextColumn, nextRow) == ' ') {
-            currentColumn = nextColumn;
-            currentRow = nextRow;
-            movementPath.add("F"); // Record the forward movement
-        }
+    private boolean canMoveForward() {
+        return canMove(DirectionManager.getForwardStepOffsets(currentDirection));
     }
 
-    // Turn left and record the movement
-    public void turnToLeft() {
+    private boolean canMoveRight() {
+        DirectionManager.Direction rightDir = DirectionManager.getTurnedRightDirection(currentDirection);
+        return canMove(DirectionManager.getForwardStepOffsets(rightDir));
+    }
+
+    private boolean canMoveLeft() {
+        DirectionManager.Direction leftDir = DirectionManager.getTurnedLeftDirection(currentDirection);
+        return canMove(DirectionManager.getForwardStepOffsets(leftDir));
+    }
+
+    private boolean canMove(int[] offsets) {
+        int nextColumn = currentColumn + offsets[0];
+        int nextRow = currentRow + offsets[1];
+        return maze.getTile(nextColumn, nextRow) == ' ';
+    }
+
+    private void moveForward() {
+        int[] offsets = DirectionManager.getForwardStepOffsets(currentDirection);
+        currentColumn += offsets[0];
+        currentRow += offsets[1];
+        movementPath.add("F");
+    }
+
+    private void turnToLeft() {
         currentDirection = DirectionManager.getTurnedLeftDirection(currentDirection);
         movementPath.add("L");
     }
 
-    // Turn right and record the movement
-    public void turnToRight() {
+    private void turnToRight() {
         currentDirection = DirectionManager.getTurnedRightDirection(currentDirection);
         movementPath.add("R");
     }
 
-    // Return the path as a list of movements (canonical form)
+    private void turnAround() {
+        currentDirection = DirectionManager.getTurnedRightDirection(
+            DirectionManager.getTurnedRightDirection(currentDirection));
+        movementPath.add("R");
+        movementPath.add("R");
+    }
+
     public List<String> getCanonicalMovementPath() {
         return movementPath;
     }
 
-    // Compress repeated movements into a factorized form (e.g., "FFF" -> "3F")
     public String getFactorizedMovementPath() {
         StringBuilder factorizedPath = new StringBuilder();
         int repeatCount = 1;
