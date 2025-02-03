@@ -38,70 +38,55 @@ public class Explorer {
             }
         }
 
-        logger.info("Maze solved using Right-Hand Rule. Path: " + getFactorizedMovementPath());
+        logger.info("Maze solved using Right-Hand Rule.");
+        logger.info("Canonical Path: " + getCanonicalMovementPath());
+        logger.info("Factorized Path: " + getFactorizedMovementPath());
+
     }
 
     public boolean validatePath(String path) {
         logger.info("Validating path: " + path);
     
+        if (path == null || path.isEmpty()) {
+            logger.warn("Invalid path input: Path is empty or null.");
+            return false;
+        }
+
+        path = path.replaceAll("\\s+", "");
+
         int tempColumn = currentColumn;
         int tempRow = currentRow;
         DirectionManager.Direction tempDirection = currentDirection;
-    
-        int i = 0;
-        while (i < path.length()) {
-            // Extract the number before a command
-            int repeat = 0;
-            while (i < path.length() && Character.isDigit(path.charAt(i))) {
-                repeat = repeat * 10 + (path.charAt(i) - '0');
-                i++;
-            }
-    
-            // Default to 1 if no number was specified
-            if (repeat == 0) {
-                repeat = 1;
-            }
-    
-            // Ensure we still have a valid movement command
-            if (i >= path.length()) {
-                logger.warn("Path validation error: Expected movement command after number.");
-                return false;
-            }
-    
+
+        for (int i = 0; i < path.length(); i++) {
             char step = path.charAt(i);
-    
-            // Execute the movement `repeat` times
-            for (int r = 0; r < repeat; r++) {
-                switch (step) {
-                    case 'F': // Move forward
-                        int[] offsets = DirectionManager.getForwardStepOffsets(tempDirection);
-                        tempColumn += offsets[0];
-                        tempRow += offsets[1];
-    
-                        // Check if moving forward hits a wall
-                        if (maze.getTile(tempColumn, tempRow) == '#') {
-                            logger.warn("Path is invalid: hit a wall at (" + tempColumn + ", " + tempRow + ")");
-                            return false;
-                        }
-                        break;
-    
-                    case 'L': // Turn left
-                        tempDirection = DirectionManager.getTurnedLeftDirection(tempDirection);
-                        break;
-    
-                    case 'R': // Turn right
-                        tempDirection = DirectionManager.getTurnedRightDirection(tempDirection);
-                        break;
-    
-                    default:
-                        logger.warn("Invalid path character: " + step);
+
+            switch (step) {
+                case 'F': 
+                    int[] offsets = DirectionManager.getForwardStepOffsets(tempDirection);
+                    tempColumn += offsets[0];
+                    tempRow += offsets[1];
+
+                    if (maze.getTile(tempColumn, tempRow) == '#') {
+                        logger.warn("Path is invalid: hit a wall at (" + tempColumn + ", " + tempRow + ")");
                         return false;
-                }
+                    }
+                    break;
+
+                case 'L': 
+                    tempDirection = DirectionManager.getTurnedLeftDirection(tempDirection);
+                    break;
+
+                case 'R': 
+                    tempDirection = DirectionManager.getTurnedRightDirection(tempDirection);
+                    break;
+
+                default:
+                    logger.warn("Invalid path character: " + step);
+                    return false;
             }
-            i++; // Move to the next character
         }
-    
-        // Check if the final position matches the exit point
+
         boolean isValid = (tempColumn == maze.getExitColumn() && tempRow == maze.getExitRow());
         logger.info("Path validation completed. Result: " + (isValid ? "Valid" : "Invalid"));
         return isValid;
@@ -151,8 +136,8 @@ public class Explorer {
         movementPath.add("R");
     }
 
-    public List<String> getCanonicalMovementPath() {
-        return movementPath;
+    public String getCanonicalMovementPath() {
+        return String.join("", movementPath);
     }
 
     public String getFactorizedMovementPath() {
@@ -177,5 +162,4 @@ public class Explorer {
         factorizedPath.append(movementPath.get(movementPath.size() - 1));
         return factorizedPath.toString();
     }
-
 }

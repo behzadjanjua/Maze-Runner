@@ -11,7 +11,6 @@ public class Main {
     public static void main(String[] args) {
         logger.info("** Starting Maze Runner");
 
-        // Set up CLI options
         Options options = new Options();
         options.addOption("i", "input", true, "Path to the maze input file");
         options.addOption("p", "path", true, "Path sequence to validate against the maze");
@@ -23,13 +22,11 @@ public class Main {
 
         try {
             cmd = parser.parse(options, args);
-            
             if (cmd.hasOption("i")) {
                 inputFilePath = cmd.getOptionValue("i");
             } else {
                 throw new ParseException("Missing required -i option");
             }
-            
             if (cmd.hasOption("p")) {
                 pathToValidate = cmd.getOptionValue("p");
             }
@@ -44,17 +41,13 @@ public class Main {
             Maze maze = new Maze();
             maze.loadMaze(inputFilePath);
 
-            logger.info("**** Maze loaded successfully");
             Explorer explorer = new Explorer(maze);
 
             if (pathToValidate != null) {
                 boolean isValid = explorer.validatePath(pathToValidate);
-                logger.info("Path validation result: " + (isValid ? "Valid" : "Invalid"));
                 System.out.println(isValid ? "VALID" : "INVALID");
             } else {
                 explorer.solveRightHandMaze();
-                logger.info("Factorized path: " + explorer.getFactorizedMovementPath());
-                System.out.println(explorer.getFactorizedMovementPath());
             }
 
         } catch (IOException e) {

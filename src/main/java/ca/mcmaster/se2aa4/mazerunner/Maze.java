@@ -7,7 +7,7 @@ import java.io.IOException;
 public class Maze {
     private char[][] grid; // 2D array representing the maze
     private int entryColumn, entryRow; // Coordinates of the entry point
-    private int exitColumn, exitRow;   // Coordinates of the exit point
+    private int exitColumn, exitRow; // Coordinates of the exit point
 
     public void loadMaze(String filePath) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(filePath));
@@ -22,10 +22,6 @@ public class Maze {
 
         // 2. Split into lines
         String[] lines = mazeDataBuilder.toString().split("\n");
-
-        // 3. If any line is completely empty (no spaces in the empty area), and both the previous and next line contain '#',
-        //    that line is replaced with a line of spaces (same length as lines[0]).
-        //    This prevents out-of-bounds issues and enforces a "walkable" and "straight" row if surrounded by walls.
 
         for (int i = 0; i < lines.length; i++) {
             // Check if this line is empty (or just whitespace)
@@ -49,7 +45,7 @@ public class Maze {
             grid[i] = lines[i].toCharArray();
         }
 
-        // 5. Finds entry/ the exit
+        // 5. Finds entry/exit
         findEntryExit();
     }
 
