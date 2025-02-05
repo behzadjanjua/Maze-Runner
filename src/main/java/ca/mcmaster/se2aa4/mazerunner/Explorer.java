@@ -51,45 +51,88 @@ public class Explorer {
             logger.warn("Invalid path input: Path is empty or null.");
             return false;
         }
-
-        path = path.replaceAll("\\s+", "");
-
+    
+        // Convert factorized path to canonical form
+        path = expandFactorizedPath(path.replaceAll("\\s+", ""));
+        logger.info("Expanded (canonical) path: " + path);
+    
+        if (path.isEmpty()) {
+            logger.warn("Invalid path after expansion: Path is empty.");
+            return false;
+        }
+    
         int tempColumn = currentColumn;
         int tempRow = currentRow;
         DirectionManager.Direction tempDirection = currentDirection;
-
+    
         for (int i = 0; i < path.length(); i++) {
             char step = path.charAt(i);
-
+    
             switch (step) {
                 case 'F': 
                     int[] offsets = DirectionManager.getForwardStepOffsets(tempDirection);
                     tempColumn += offsets[0];
                     tempRow += offsets[1];
-
+    
                     if (maze.getTile(tempColumn, tempRow) == '#') {
                         logger.warn("Path is invalid: hit a wall at (" + tempColumn + ", " + tempRow + ")");
                         return false;
                     }
                     break;
-
+    
                 case 'L': 
                     tempDirection = DirectionManager.getTurnedLeftDirection(tempDirection);
                     break;
-
+    
                 case 'R': 
                     tempDirection = DirectionManager.getTurnedRightDirection(tempDirection);
                     break;
-
+    
                 default:
                     logger.warn("Invalid path character: " + step);
                     return false;
             }
         }
-
+    
         boolean isValid = (tempColumn == maze.getExitColumn() && tempRow == maze.getExitRow());
         logger.info("Path validation completed. Result: " + (isValid ? "Valid" : "Invalid"));
         return isValid;
+    }
+
+    private String expandFactorizedPath(String factorizedPath) {
+        StringBuilder expandedPath = new StringBuilder();
+        int i = 0;
+    
+        while (i < factorizedPath.length()) {
+            char currentChar = factorizedPath.charAt(i);
+    
+            if (Character.isLetter(currentChar)) { // If 'F', 'L', or 'R'
+                int repeatCount = 1; // Default is 1 unless a number is before
+                int j = i - 1;
+    
+                // Check if there's a number priorr to this character
+                while (j >= 0 && Character.isDigit(factorizedPath.charAt(j))) {
+                    j--;
+                }
+    
+                if (j < i - 1) { // there IS number exists before this letter
+                    repeatCount = Integer.parseInt(factorizedPath.substring(j + 1, i));
+                }
+    
+                expandedPath.append(String.valueOf(currentChar).repeat(repeatCount));
+            } else if (Character.isDigit(currentChar)) {
+                // If we find a digit, skip it (since it will be processed in the next letter)
+                if (i == 0 || !Character.isLetter(factorizedPath.charAt(i - 1))) {
+                    logger.warn("Unexpected number without preceding movement: " + currentChar);
+                }
+            } else {
+                logger.warn("Skipping unexpected character: " + currentChar);
+            }
+            i++;
+        }
+    
+        logger.info("Expanded path: " + expandedPath.toString());
+        return expandedPath.toString();
     }
 
     private boolean canMoveForward() {
