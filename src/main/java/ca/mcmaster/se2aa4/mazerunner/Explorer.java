@@ -46,79 +46,110 @@ public class Explorer {
 
     public boolean validatePath(String path) {
         logger.info("Validating path: " + path);
-    
+
         if (path == null || path.isEmpty()) {
             logger.warn("Invalid path input: Path is empty or null.");
             return false;
         }
-    
+
         // Convert factorized path to canonical form
         path = expandFactorizedPath(path.replaceAll("\\s+", ""));
         logger.info("Expanded (canonical) path: " + path);
-    
+
         if (path.isEmpty()) {
             logger.warn("Invalid path after expansion: Path is empty.");
             return false;
         }
-    
-        int tempColumn = currentColumn;
-        int tempRow = currentRow;
-        DirectionManager.Direction tempDirection = currentDirection;
-    
+
+        // First pass: Validate using the predefined entry/exit
+        boolean isValid = validatePathDirection(path, maze.getEntryColumn(), maze.getEntryRow(), maze.getExitColumn(), maze.getExitRow(), currentDirection);
+
+        if (isValid) {
+            logger.info("Path is VALID from predefined Entry to Exit.");
+            return true;
+        }
+
+        // If first validation fails, swap entry and exit, then retry
+        logger.warn("Path is INVALID from predefined Entry to Exit. Attempting flipped entrance/exit...");
+
+        // Reverse the starting direction
+        DirectionManager.Direction flippedDirection = DirectionManager.getTurnedRightDirection(
+                DirectionManager.getTurnedRightDirection(currentDirection)); // 180-degree turn
+
+        isValid = validatePathDirection(path,
+                maze.getExitColumn(), maze.getExitRow(),
+                maze.getEntryColumn(), maze.getEntryRow(),
+                flippedDirection);
+
+        if (isValid) {
+            logger.info("Path is VALID from flipped Entrance to Exit.");
+            return true;
+        }
+
+        logger.error("Path is INVALID in both predefined and flipped configurations.");
+        return false;
+    }
+
+    private boolean validatePathDirection(String path, int startColumn, int startRow,
+            int targetColumn, int targetRow,
+            DirectionManager.Direction startDirection) {
+        int tempColumn = startColumn;
+        int tempRow = startRow;
+        DirectionManager.Direction tempDirection = startDirection;
+
         for (int i = 0; i < path.length(); i++) {
             char step = path.charAt(i);
-    
+
             switch (step) {
-                case 'F': 
+                case 'F':
                     int[] offsets = DirectionManager.getForwardStepOffsets(tempDirection);
                     tempColumn += offsets[0];
                     tempRow += offsets[1];
-    
+
                     if (maze.getTile(tempColumn, tempRow) == '#') {
                         logger.warn("Path is invalid: hit a wall at (" + tempColumn + ", " + tempRow + ")");
                         return false;
                     }
                     break;
-    
-                case 'L': 
+
+                case 'L':
                     tempDirection = DirectionManager.getTurnedLeftDirection(tempDirection);
                     break;
-    
-                case 'R': 
+
+                case 'R':
                     tempDirection = DirectionManager.getTurnedRightDirection(tempDirection);
                     break;
-    
+
                 default:
                     logger.warn("Invalid path character: " + step);
                     return false;
             }
         }
-    
-        boolean isValid = (tempColumn == maze.getExitColumn() && tempRow == maze.getExitRow());
-        logger.info("Path validation completed. Result: " + (isValid ? "Valid" : "Invalid"));
-        return isValid;
+
+        // Check if we reached the target (entry or exit)
+        return (tempColumn == targetColumn && tempRow == targetRow);
     }
 
     private String expandFactorizedPath(String factorizedPath) {
         StringBuilder expandedPath = new StringBuilder();
         int i = 0;
-    
+
         while (i < factorizedPath.length()) {
             char currentChar = factorizedPath.charAt(i);
-    
+
             if (Character.isLetter(currentChar)) { // If 'F', 'L', or 'R'
                 int repeatCount = 1; // Default is 1 unless a number is before
                 int j = i - 1;
-    
+
                 // Check if there's a number priorr to this character
                 while (j >= 0 && Character.isDigit(factorizedPath.charAt(j))) {
                     j--;
                 }
-    
+
                 if (j < i - 1) { // there IS number exists before this letter
                     repeatCount = Integer.parseInt(factorizedPath.substring(j + 1, i));
                 }
-    
+
                 expandedPath.append(String.valueOf(currentChar).repeat(repeatCount));
             } else if (Character.isDigit(currentChar)) {
                 // If we find a digit, skip it (since it will be processed in the next letter)
@@ -130,7 +161,6 @@ public class Explorer {
             }
             i++;
         }
-    
         logger.info("Expanded path: " + expandedPath.toString());
         return expandedPath.toString();
     }
@@ -174,7 +204,7 @@ public class Explorer {
 
     private void turnAround() {
         currentDirection = DirectionManager.getTurnedRightDirection(
-            DirectionManager.getTurnedRightDirection(currentDirection));
+                DirectionManager.getTurnedRightDirection(currentDirection));
         movementPath.add("R");
         movementPath.add("R");
     }
