@@ -1,5 +1,7 @@
 package ca.mcmaster.se2aa4.mazerunner;
 
+import java.util.Objects;
+
 public class Position {
     private final int row;
     private final int column;
@@ -28,6 +30,17 @@ public class Position {
             return false;
         }
         return true;
+    }
+
+    // Used for comparing if explorer reaches exit position
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true; // Check if same reference
+        if (obj == null || getClass() != obj.getClass())
+            return false; // Check type
+        Position position = (Position) obj;
+        return row == position.row && column == position.column;
     }
 
     public String toString() {
