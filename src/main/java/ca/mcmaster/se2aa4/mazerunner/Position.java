@@ -1,7 +1,5 @@
 package ca.mcmaster.se2aa4.mazerunner;
 
-import java.util.Objects;
-
 public class Position {
     private final int row;
     private final int column;
