@@ -2,7 +2,6 @@ package ca.mcmaster.se2aa4.mazerunner;
 
 import java.util.List;
 
-// Encapsulates a maze solution.
 public class MazeSolution {
     private final List<String> movementPath; // List of movements.
 
