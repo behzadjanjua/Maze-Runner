@@ -3,58 +3,61 @@ package ca.mcmaster.se2aa4.mazerunner;
 import java.util.List;
 
 public class PathFormatter {
-
     public static String getCanonicalPath(List<String> moves) {
-        StringBuilder canonicalPath = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         for (String move : moves) {
-            canonicalPath.append(move);
+            sb.append(move);
         }
-        return canonicalPath.toString();
+        return sb.toString();
     }
-
+    
     public static String getFactorizedPath(List<String> moves) {
-        if (moves.isEmpty()) {
-            return "";
-        }
-        StringBuilder factorizedPath = new StringBuilder();
-        int repeatCount = 1;
+        if (moves.isEmpty()) return "";
+        StringBuilder sb = new StringBuilder();
+        int count = 1;
         for (int i = 1; i < moves.size(); i++) {
+            // Count repeated moves.
             if (moves.get(i).equals(moves.get(i - 1))) {
-                repeatCount++;
+                count++;
             } else {
-                if (repeatCount > 1) {
-                    factorizedPath.append(repeatCount);
+                // Append the count if more than one, then after, the move.
+                if (count > 1) {
+                    sb.append(count);
                 }
-                factorizedPath.append(moves.get(i - 1));
-                repeatCount = 1;
+                sb.append(moves.get(i - 1));
+                count = 1;
             }
         }
-        if (repeatCount > 1) {
-            factorizedPath.append(repeatCount);
+        // Appends the final set of moves.
+        if (count > 1) {
+            sb.append(count);
         }
-        factorizedPath.append(moves.get(moves.size() - 1));
-        return factorizedPath.toString();
+        sb.append(moves.get(moves.size() - 1));
+        return sb.toString();
     }
-
+    
     public static String expandFactorizedPath(String factorizedPath) {
-        StringBuilder expandedPath = new StringBuilder();
+        StringBuilder expanded = new StringBuilder();
         int i = 0;
         while (i < factorizedPath.length()) {
-            char currentCharacter = factorizedPath.charAt(i);
-            if (Character.isLetter(currentCharacter)) { // Should be 'F', 'L', or 'R'
-                int repeatCount = 1;
+            char c = factorizedPath.charAt(i);
+            if (Character.isLetter(c)) {
+                int count = 1;
                 int j = i - 1;
-                // Checking for preceding digits that indicate the repeat count.
+                // Check if there is a number before the letter.
                 while (j >= 0 && Character.isDigit(factorizedPath.charAt(j))) {
                     j--;
                 }
                 if (j < i - 1) {
-                    repeatCount = Integer.parseInt(factorizedPath.substring(j + 1, i));
+                    count = Integer.parseInt(factorizedPath.substring(j + 1, i));
                 }
-                expandedPath.append(String.valueOf(currentCharacter).repeat(repeatCount));
+                // Append the character 'count' times.
+                for (int k = 0; k < count; k++) {
+                    expanded.append(c);
+                }
             }
             i++;
         }
-        return expandedPath.toString();
+        return expanded.toString();
     }
 }

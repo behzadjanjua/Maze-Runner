@@ -17,30 +17,19 @@ public class Position {
         return column;
     }
 
-    public boolean isSamePosition(Position other) {
-        if (other == null) {
-            return false;
-        }
-        if (this.row != other.getRow()) {
-            return false;
-        }
-        if (this.column != other.getColumn()) {
-            return false;
-        }
-        return true;
-    }
-
-    // Used for comparing if explorer reaches exit position
+    // Overrides the equals method to compare Positions by row and column
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true; // Check if same reference
-        if (obj == null || getClass() != obj.getClass())
-            return false; // Check type
-        Position position = (Position) obj;
-        return row == position.row && column == position.column;
+        if (this == obj)  // If comparing to itself, they are equal
+            return true;
+        if (obj == null || getClass() != obj.getClass())  // Check for null or different class
+            return false;
+        Position pos = (Position) obj;
+        return row == pos.row && column == pos.column;  
     }
 
+    // Provides a string representation of the Position in a (column, row) format
+    @Override
     public String toString() {
         return "(" + column + ", " + row + ")";
     }

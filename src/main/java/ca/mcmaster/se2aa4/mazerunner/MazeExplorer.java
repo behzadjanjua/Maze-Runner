@@ -5,52 +5,56 @@ import java.util.List;
 
 public class MazeExplorer {
     private Position currentPosition;
-    private DirectionManager.Direction currentDirection;
-    private List<String> movementPath;
+    private MazeDirection currentDirection;
+    private List<String> movementPath; // Stores movement history as a sequence of "F", "L", "R"
 
-    public MazeExplorer(Position startingPosition, DirectionManager.Direction startingDirection) {
+    public MazeExplorer(Position startingPosition, MazeDirection startingDirection) {
         this.currentPosition = startingPosition;
         this.currentDirection = startingDirection;
         this.movementPath = new ArrayList<>();
     }
-
+    
     public Position getPosition() {
         return currentPosition;
     }
-
-    public DirectionManager.Direction getDirection() {
+    
+    public MazeDirection getDirection() {
         return currentDirection;
     }
-
+    
     public List<String> getMovementPath() {
         return movementPath;
     }
-
-    public Position getNextPosition(DirectionManager.Direction direction) {
-        int[] offsets = DirectionManager.getForwardStepOffsets(direction);
-        int nextRow = currentPosition.getRow() + offsets[1];
-        int nextColumn = currentPosition.getColumn() + offsets[0];
+    
+    public Position getNextPosition(MazeDirection direction) {
+        int[] offset = direction.getOffset();
+        // Calculate next position based on direction offsets.
+        int nextRow = currentPosition.getRow() + offset[1]; // Vertical movement
+        int nextColumn = currentPosition.getColumn() + offset[0]; // Horizontal movement
         return new Position(nextRow, nextColumn);
     }
-
+    
     public void moveForward() {
+        // Move forward in the current direction.
         currentPosition = getNextPosition(currentDirection);
-        movementPath.add("F");
+        movementPath.add("F"); // Log forward movement
     }
-
+    
     public void turnLeft() {
-        currentDirection = DirectionManager.getTurnedLeftDirection(currentDirection);
+        // Rotate the explorer 90° counterclockwise.
+        currentDirection = currentDirection.rotateLeft();
         movementPath.add("L");
     }
-
+    
     public void turnRight() {
-        currentDirection = DirectionManager.getTurnedRightDirection(currentDirection);
+        // Rotate the explorer 90° clockwise.
+        currentDirection = currentDirection.rotateRight();
         movementPath.add("R");
     }
-
+    
     public void turnAround() {
-        currentDirection = DirectionManager.getTurnedRightDirection(
-            DirectionManager.getTurnedRightDirection(currentDirection));
+        // Turn 180° by rotating right twice.
+        currentDirection = currentDirection.rotateRight().rotateRight();
         movementPath.add("R");
         movementPath.add("R");
     }

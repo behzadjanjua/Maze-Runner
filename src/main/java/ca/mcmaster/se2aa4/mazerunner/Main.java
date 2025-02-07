@@ -11,54 +11,71 @@ public class Main {
     public static void main(String[] args) {
         logger.info("** Starting Maze Runner");
 
-        Options commandLineOptions = new Options();
-        commandLineOptions.addOption("i", "input", true, "Path to the maze input file");
-        commandLineOptions.addOption("p", "path", true, "Path sequence to validate against the maze");
+        // Define command-line options.
+        Options options = new Options();
+        options.addOption("i", "input", true, "Path to the maze input file");
+        options.addOption("p", "path", true, "Path sequence to validate");
 
-        CommandLineParser commandLineParser = new DefaultParser();
-        CommandLine parsedCommandLine;
-        String mazeInputFilePath = null;
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd;
+        String mazeFilePath = null;
         String pathToValidate = null;
 
         try {
-            parsedCommandLine = commandLineParser.parse(commandLineOptions, args);
-            if (parsedCommandLine.hasOption("i")) {
-                mazeInputFilePath = parsedCommandLine.getOptionValue("i");
+            cmd = parser.parse(options, args);
+
+            // Retrieve maze file path.
+            if (cmd.hasOption("i")) {
+                mazeFilePath = cmd.getOptionValue("i");
             } else {
                 throw new ParseException("Missing required -i option");
             }
-            if (parsedCommandLine.hasOption("p")) {
-                pathToValidate = parsedCommandLine.getOptionValue("p");
+
+            // Retrieve path validation string if provided.
+            if (cmd.hasOption("p")) {
+                pathToValidate = cmd.getOptionValue("p");
             }
-        } catch (ParseException exception) {
-            logger.error("Error parsing command line: " + exception.getMessage());
-            logger.error("Usage: java -jar mazerunner.jar -i <inputfile> [-p <path>]");
+        } catch (ParseException e) {
+            System.out.println("Error parsing command line: " + e.getMessage());
+            System.out.println("Usage: java -jar mazerunner.jar -i <inputfile> [-p <path>]");
             return;
         }
 
         try {
-            logger.info("Reading maze from file: " + mazeInputFilePath);
-            MazeLoader mazeLoader = new MazeLoader();
-            MazeGrid maze = mazeLoader.loadMaze(mazeInputFilePath);
-            MazeExplorer explorer = new MazeExplorer(maze.getEntryPosition(), DirectionManager.Direction.EAST);
+            logger.info("Loading maze from file: " + mazeFilePath);
+            MazeLoader loader = new MazeLoader();
+            MazeGrid maze = loader.loadMaze(mazeFilePath);
+            MazeExplorer explorer = new MazeExplorer(maze.getEntryPosition(), MazeDirection.EAST);
 
             if (pathToValidate != null) {
-                boolean isPathValid = PathVerifier.validatePath(pathToValidate, maze,
-                        maze.getEntryPosition(), maze.getExitPosition(),
-                        explorer.getDirection());
-                System.out.println(isPathValid ? "VALID" : "INVALID");
+                // Validate the provided movement path.
+                boolean valid = PathVerifier.validatePath(
+                        pathToValidate, maze, maze.getEntryPosition(), maze.getExitPosition(), explorer.getDirection());
+
+                if (valid) {
+                    System.out.println("The inputted path is VALID");
+                } else {
+                    System.out.println("The inputted path is INVALID");
+                }
             } else {
-                MazeSolvingAlgorithm mazeSolver = new RightHandRuleAlgorithm();
-                MazeSolution mazeSolution = mazeSolver.solve(maze, explorer);
-                logger.info("Canonical Path: " + mazeSolution.getCanonicalPath());
-                logger.info("Factorized Path: " + mazeSolution.getFactorizedPath());
-                System.out.println("Canonical Path: " + mazeSolution.getCanonicalPath());
-                System.out.println("Factorized Path: " + mazeSolution.getFactorizedPath());
+                // Solve the maze using the right-hand rule algorithm.
+                MazeSolvingAlgorithm solver = new RightHandRuleAlgorithm();
+                java.util.List<String> moves = solver.solve(maze, explorer);
+
+                // Format and display the path. (Commented out canonical)
+                // String canonicalPath = PathFormatter.getCanonicalPath(moves);
+
+                String factorizedPath = PathFormatter.getFactorizedPath(moves);
+
+                // logger.info("Canonical Path: " + canonicalPath);
+                logger.info("Factorized Path: " + factorizedPath);
+
+                System.out.println("Factorized Path: " + factorizedPath);
             }
-        } catch (IOException ioException) {
-            logger.error("Error reading the maze file: " + ioException.getMessage());
-        } catch (Exception exception) {
-            logger.error("Error computing the path: " + exception.getMessage());
+        } catch (IOException e) {
+            System.out.println(("Error reading maze file: " + e.getMessage()));
+        } catch (Exception e) {
+            System.out.println("Error during maze processing: " + e.getMessage());
         }
 
         logger.info("** End of Maze Runner");
