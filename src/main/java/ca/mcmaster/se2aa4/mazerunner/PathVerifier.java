@@ -63,7 +63,7 @@ public class PathVerifier {
                     currentDirection = currentDirection.rotateRight();
                     break;
                 default:
-                    logger.warn("Invalid move: " + move);
+                    System.out.println("Invalid move: " + move);
                     return false;
             }
         }
