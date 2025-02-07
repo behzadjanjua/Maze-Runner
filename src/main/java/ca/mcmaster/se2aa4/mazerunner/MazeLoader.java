@@ -7,13 +7,13 @@ import java.io.IOException;
 public class MazeLoader {
     
     public MazeGrid loadMaze(String filePath) throws IOException {
-        // Open the file and read its contents line by line.
+        // Opening the file and read its contents line by line.
         BufferedReader reader = new BufferedReader(new FileReader(filePath));
         StringBuilder mazeData = new StringBuilder();
         String line;
         
         while ((line = reader.readLine()) != null) {
-            mazeData.append(line).append("\n"); // Preserve line breaks for proper processing.
+            mazeData.append(line).append("\n"); // Preserves line breaks for proper processing.
         }
         reader.close();
         

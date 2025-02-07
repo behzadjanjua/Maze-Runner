@@ -41,13 +41,11 @@ public class MazeExplorer {
     }
     
     public void turnLeft() {
-        // Rotate the explorer 90° counterclockwise.
         currentDirection = currentDirection.rotateLeft();
         movementPath.add("L");
     }
     
     public void turnRight() {
-        // Rotate the explorer 90° clockwise.
         currentDirection = currentDirection.rotateRight();
         movementPath.add("R");
     }
