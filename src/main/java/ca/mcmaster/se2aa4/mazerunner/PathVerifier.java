@@ -5,8 +5,9 @@ import org.apache.logging.log4j.Logger;
 
 public class PathVerifier {
     private static final Logger logger = LogManager.getLogger();
-    
-    public static boolean validatePath(String path, MazeGrid maze, Position entry, Position exit, MazeDirection startingDirection) {
+
+    public static boolean validatePath(String path, MazeGrid maze, Position entry, Position exit,
+            MazeDirection startingDirection) {
         logger.info("Validating path: " + path);
         if (path == null || path.isEmpty()) {
             logger.warn("Invalid path: empty or null.");
@@ -35,36 +36,29 @@ public class PathVerifier {
         logger.error("Path is INVALID in both configurations.");
         return false;
     }
-    
-    private static boolean validatePathDirection(String path, MazeGrid maze, Position start, Position target, MazeDirection startingDirection) {
+
+    private static boolean validatePathDirection(String path, MazeGrid maze, Position start, Position target,
+            MazeDirection startingDirection) {
         // Begin at the starting position and simulate each move.
         Position currentPosition = new Position(start.getRow(), start.getColumn());
         MazeDirection currentDirection = startingDirection;
+        MazeExplorer explorer = new MazeExplorer(currentPosition, currentDirection);
+
         for (int i = 0; i < path.length(); i++) {
             char move = path.charAt(i);
-            switch(move) {
-                case 'F':
-                    // Calculate new position using the current direction's offset.
-                    int[] offset = currentDirection.getOffset();
-                    currentPosition = new Position(currentPosition.getRow() + offset[1], currentPosition.getColumn() + offset[0]);
-                    
-                    // If the new position is not walkable, the path is invalid.
-                    if (!maze.isWalkable(currentPosition)) {
-                        logger.warn("Hit wall at (" + currentPosition.getColumn() + ", " + currentPosition.getRow() + ")");
-                        return false;
-                    }
-                    break;
-                case 'L':
-                    // Turn left.
-                    currentDirection = currentDirection.rotateLeft();
-                    break;
-                case 'R':
-                    // Turn right.
-                    currentDirection = currentDirection.rotateRight();
-                    break;
-                default:
-                    System.out.println("Invalid move: " + move);
+            try {
+                explorer.executeCommand(String.valueOf(move));
+                currentPosition = explorer.getPosition();
+                currentDirection = explorer.getDirection();
+
+                // If the new position is not walkable, the path is invalid.
+                if (!maze.isWalkable(currentPosition)) {
+                    logger.warn("Hit wall at (" + currentPosition.getColumn() + ", " + currentPosition.getRow() + ")");
                     return false;
+                }
+            } catch (IllegalArgumentException e) {
+                logger.warn("Invalid move: " + move);
+                return false;
             }
         }
         // Return true if the final position matches the target.
