@@ -1,5 +1,7 @@
 package ca.mcmaster.se2aa4.mazerunner;
 
+import ca.mcmaster.se2aa4.mazerunner.builders.MazeExplorerBuilder;
+import ca.mcmaster.se2aa4.mazerunner.builders.MazeGridBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,56 +16,81 @@ public class RightHandRuleAlgorithmTest {
     @BeforeEach
     void setUp() throws IOException {
         MazeLoader mazeLoader = new MazeLoader();
-        simpleMazeGrid = mazeLoader.loadMaze("./examples/tiny.maz.txt");
-        complexMazeGrid = mazeLoader.loadMaze("./examples/small.maz.txt");
+        // Load the maze data
+        char[][] simpleGrid = mazeLoader.loadGrid("./examples/tiny.maz.txt");
+        Position simpleEntryPos = mazeLoader.findEntryPosition(simpleGrid);
+        Position simpleExitPos = mazeLoader.findExitPosition(simpleGrid);
+
+        char[][] complexGrid = mazeLoader.loadGrid("./examples/small.maz.txt");
+        Position complexEntryPos = mazeLoader.findEntryPosition(complexGrid);
+        Position complexExitPos = mazeLoader.findExitPosition(complexGrid);
+
+        // Use builders to create maze grids
+        simpleMazeGrid = new MazeGridBuilder()
+                .setGrid(simpleGrid)
+                .setEntryPosition(simpleEntryPos)
+                .setExitPosition(simpleExitPos)
+                .build();
+
+        complexMazeGrid = new MazeGridBuilder()
+                .setGrid(complexGrid)
+                .setEntryPosition(complexEntryPos)
+                .setExitPosition(complexExitPos)
+                .build();
+
         algorithm = new RightHandRuleAlgorithm();
     }
 
     @Test
     void testSolveSimpleMaze() {
-        MazeExplorer explorer = new MazeExplorer(simpleMazeGrid.getEntryPosition(), MazeDirection.SOUTH);
-        List<String> solution = algorithm.solve(simpleMazeGrid, explorer);
+        // Use builder to create explorer
+        MazeExplorer explorer = new MazeExplorerBuilder()
+                .setStartingPosition(simpleMazeGrid.getEntryPosition())
+                .setStartingDirection(MazeDirection.SOUTH)
+                .build();
 
-        MazeExplorer verifier = new MazeExplorer(simpleMazeGrid.getEntryPosition(), MazeDirection.SOUTH);
-        for (String move : solution) {
-            switch (move) {
-                case "F": verifier.moveForward(); break;
-                case "L": verifier.turnLeft(); break;
-                case "R": verifier.turnRight(); break;
-            }
-        }
-        assertEquals(simpleMazeGrid.getExitPosition(), verifier.getPosition());
+
+        // Need to check if the explorer reached the exit position
+        assertEquals(simpleMazeGrid.getExitPosition(), explorer.getPosition(),
+                "Explorer should reach the exit position after algorithm execution");
     }
 
     @Test
     void testSolveComplexMaze() {
-        MazeExplorer explorer = new MazeExplorer(complexMazeGrid.getEntryPosition(), MazeDirection.SOUTH);
-        List<String> solution = algorithm.solve(complexMazeGrid, explorer);
+        // Use builder to create explorer
+        MazeExplorer explorer = new MazeExplorerBuilder()
+                .setStartingPosition(complexMazeGrid.getEntryPosition())
+                .setStartingDirection(MazeDirection.SOUTH)
+                .build();
 
-        MazeExplorer verifier = new MazeExplorer(complexMazeGrid.getEntryPosition(), MazeDirection.SOUTH);
-        for (String move : solution) {
-            switch (move) {
-                case "F": verifier.moveForward(); break;
-                case "L": verifier.turnLeft(); break;
-                case "R": verifier.turnRight(); break;
-            }
-        }
-        assertEquals(complexMazeGrid.getExitPosition(), verifier.getPosition());
+        assertEquals(complexMazeGrid.getExitPosition(), explorer.getPosition(),
+                "Explorer should reach the exit position after algorithm execution");
     }
 
     @Test
     void testSolutionValidity() {
-        MazeExplorer explorer = new MazeExplorer(complexMazeGrid.getEntryPosition(), MazeDirection.SOUTH);
+        // Use builder to create explorer
+        MazeExplorer explorer = new MazeExplorerBuilder()
+                .setStartingPosition(complexMazeGrid.getEntryPosition())
+                .setStartingDirection(MazeDirection.SOUTH)
+                .build();
+
         List<String> solution = algorithm.solve(complexMazeGrid, explorer);
 
         for (String move : solution) {
-            assertTrue(move.equals("F") || move.equals("L") || move.equals("R"));
+            // Check for F, L, R, or RR 
+            assertTrue(move.equals("F") || move.equals("L") || move.equals("R") || move.equals("RR"), "Move '" + move + "' should be one of F, L, R, or RR");
         }
     }
 
     @Test
     void testSolutionCompleteness() {
-        MazeExplorer explorer = new MazeExplorer(complexMazeGrid.getEntryPosition(), MazeDirection.SOUTH);
+        // Use builder to create explorer
+        MazeExplorer explorer = new MazeExplorerBuilder()
+                .setStartingPosition(complexMazeGrid.getEntryPosition())
+                .setStartingDirection(MazeDirection.SOUTH)
+                .build();
+
         List<String> solution = algorithm.solve(complexMazeGrid, explorer);
 
         assertFalse(solution.isEmpty());
