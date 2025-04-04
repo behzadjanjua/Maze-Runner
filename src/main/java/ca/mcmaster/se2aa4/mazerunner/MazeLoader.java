@@ -41,9 +41,7 @@ public class MazeLoader {
         int expectedColumns = lines[0].length();
         for (int rowIndex = 0; rowIndex < lines.length; rowIndex++) {
             if (lines[rowIndex].length() < expectedColumns) {
-                lines[rowIndex] = String.format("%-" + expectedColumns + "s", lines[rowIndex]); // Pad shorter rows with
-                                                                                                // spaces (For the
-                                                                                                // direct maze)
+                lines[rowIndex] = String.format("%-" + expectedColumns + "s", lines[rowIndex]); // Pad shorter rows with spaces (For the direct maze)
             }
         }
 
@@ -61,7 +59,6 @@ public class MazeLoader {
     public Position findEntryPosition(char[][] grid) {
         // Identify the maze's entry point
         int rows = grid.length;
-        int cols = grid[0].length;
 
         for (int row = 0; row < rows; row++) {
             if (grid[row][0] == ' ') { // Entry is any open space in the first column.
