@@ -7,6 +7,14 @@ import java.io.IOException;
 public class MazeLoader {
 
     public MazeGrid loadMaze(String filePath) throws IOException {
+        char[][] grid = loadGrid(filePath);
+        Position entryPosition = findEntryPosition(grid);
+        Position exitPosition = findExitPosition(grid);
+
+        return new MazeGrid(grid, entryPosition, exitPosition);
+    }
+
+    public char[][] loadGrid(String filePath) throws IOException {
         // Opening the file and read its contents line by line.
         BufferedReader reader = new BufferedReader(new FileReader(filePath));
         StringBuilder mazeData = new StringBuilder();
@@ -33,7 +41,9 @@ public class MazeLoader {
         int expectedColumns = lines[0].length();
         for (int rowIndex = 0; rowIndex < lines.length; rowIndex++) {
             if (lines[rowIndex].length() < expectedColumns) {
-                lines[rowIndex] = String.format("%-" + expectedColumns + "s", lines[rowIndex]); // Pad shorter rows with spaces (For the direct maze)
+                lines[rowIndex] = String.format("%-" + expectedColumns + "s", lines[rowIndex]); // Pad shorter rows with
+                                                                                                // spaces (For the
+                                                                                                // direct maze)
             }
         }
 
@@ -45,19 +55,35 @@ public class MazeLoader {
             grid[i] = lines[i].toCharArray();
         }
 
-        // Identify the maze's entry and exit points.
-        Position entryPosition = null;
-        Position exitPosition = null;
+        return grid;
+    }
+
+    public Position findEntryPosition(char[][] grid) {
+        // Identify the maze's entry point
+        int rows = grid.length;
+        int cols = grid[0].length;
+
         for (int row = 0; row < rows; row++) {
             if (grid[row][0] == ' ') { // Entry is any open space in the first column.
-                entryPosition = new Position(row, 0);
-            }
-            if (grid[row][cols - 1] == ' ') { // Exit is any open space in the last column.
-                exitPosition = new Position(row, cols - 1);
+                return new Position(row, 0);
             }
         }
 
-        return new MazeGrid(grid, entryPosition, exitPosition);
+        return null; // No entry found
+    }
+
+    public Position findExitPosition(char[][] grid) {
+        // Identify the maze's exit point
+        int rows = grid.length;
+        int cols = grid[0].length;
+
+        for (int row = 0; row < rows; row++) {
+            if (grid[row][cols - 1] == ' ') { // Exit is any open space in the last column.
+                return new Position(row, cols - 1);
+            }
+        }
+
+        return null; // No exit found
     }
 
     private String generateSpaces(int length) {

@@ -13,19 +13,19 @@ public class MazeExplorer {
         this.currentDirection = startingDirection;
         this.movementPath = new ArrayList<>();
     }
-    
+
     public Position getPosition() {
         return currentPosition;
     }
-    
+
     public MazeDirection getDirection() {
         return currentDirection;
     }
-    
+
     public List<String> getMovementPath() {
         return movementPath;
     }
-    
+
     public Position getNextPosition(MazeDirection direction) {
         int[] offset = direction.getOffset();
         // Calculate next position based on direction offsets.
@@ -33,23 +33,24 @@ public class MazeExplorer {
         int nextColumn = currentPosition.getColumn() + offset[0]; // Horizontal movement
         return new Position(nextRow, nextColumn);
     }
-    
+
+    // These methods are now used by the command pattern
     public void moveForward() {
         // Move forward in the current direction.
         currentPosition = getNextPosition(currentDirection);
         movementPath.add("F"); // Log forward movement
     }
-    
+
     public void turnLeft() {
         currentDirection = currentDirection.rotateLeft();
         movementPath.add("L");
     }
-    
+
     public void turnRight() {
         currentDirection = currentDirection.rotateRight();
         movementPath.add("R");
     }
-    
+
     public void turnAround() {
         // Turn 180° by rotating right twice.
         currentDirection = currentDirection.rotateRight().rotateRight();

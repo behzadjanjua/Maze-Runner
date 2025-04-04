@@ -1,5 +1,8 @@
 package ca.mcmaster.se2aa4.mazerunner;
 
+import ca.mcmaster.se2aa4.mazerunner.builders.MazeExplorerBuilder;
+import ca.mcmaster.se2aa4.mazerunner.builders.MazeGridBuilder;
+
 import java.io.IOException;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
@@ -44,8 +47,24 @@ public class Main {
         try {
             logger.info("Loading maze from file: " + mazeFilePath);
             MazeLoader loader = new MazeLoader();
-            MazeGrid maze = loader.loadMaze(mazeFilePath);
-            MazeExplorer explorer = new MazeExplorer(maze.getEntryPosition(), MazeDirection.EAST);
+
+            // Get maze components from the loader
+            char[][] grid = loader.loadGrid(mazeFilePath);
+            Position entryPosition = loader.findEntryPosition(grid);
+            Position exitPosition = loader.findExitPosition(grid);
+
+            // Use the builder to construct the maze
+            MazeGrid maze = new MazeGridBuilder()
+                    .setGrid(grid)
+                    .setEntryPosition(entryPosition)
+                    .setExitPosition(exitPosition)
+                    .build();
+
+            // Use the builder to construct the explorer
+            MazeExplorer explorer = new MazeExplorerBuilder()
+                    .setStartingPosition(maze.getEntryPosition())
+                    .setStartingDirection(MazeDirection.EAST)
+                    .build();
 
             if (pathToValidate != null) {
                 // Validate the provided movement path.
