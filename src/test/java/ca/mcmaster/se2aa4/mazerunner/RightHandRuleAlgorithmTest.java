@@ -49,6 +49,7 @@ public class RightHandRuleAlgorithmTest {
                 .setStartingDirection(MazeDirection.SOUTH)
                 .build();
 
+        algorithm.solve(simpleMazeGrid, explorer);
 
         // Need to check if the explorer reached the exit position
         assertEquals(simpleMazeGrid.getExitPosition(), explorer.getPosition(),
@@ -57,11 +58,13 @@ public class RightHandRuleAlgorithmTest {
 
     @Test
     void testSolveComplexMaze() {
-        // Use builder to create explorer
         MazeExplorer explorer = new MazeExplorerBuilder()
                 .setStartingPosition(complexMazeGrid.getEntryPosition())
                 .setStartingDirection(MazeDirection.SOUTH)
                 .build();
+
+        // Execute the algorithm to solve the maze
+        algorithm.solve(complexMazeGrid, explorer);
 
         assertEquals(complexMazeGrid.getExitPosition(), explorer.getPosition(),
                 "Explorer should reach the exit position after algorithm execution");
@@ -78,8 +81,9 @@ public class RightHandRuleAlgorithmTest {
         List<String> solution = algorithm.solve(complexMazeGrid, explorer);
 
         for (String move : solution) {
-            // Check for F, L, R, or RR 
-            assertTrue(move.equals("F") || move.equals("L") || move.equals("R") || move.equals("RR"), "Move '" + move + "' should be one of F, L, R, or RR");
+            // Check for F, L, R, or RR
+            assertTrue(move.equals("F") || move.equals("L") || move.equals("R") || move.equals("RR"),
+                    "Move '" + move + "' should be one of F, L, R, or RR");
         }
     }
 
